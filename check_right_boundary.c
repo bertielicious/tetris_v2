@@ -5,6 +5,7 @@
 
 bool check_right_boundary(void)
 {
+   
    unsigned char row;
    for(row = 0; row < 16; row++)
    {
@@ -16,3 +17,4 @@ bool check_right_boundary(void)
    }
    return 0;
 }
+

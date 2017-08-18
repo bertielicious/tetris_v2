@@ -6,12 +6,10 @@ void init_TMR0 (void)
 {
 OPTION_REGbits.TMR0CS = 0;  // Fosc/4
 OPTION_REGbits.PSA = 0; // prescaler assigned to TMR0
-OPTION_REGbits.PS2 = 1; // 1:32 prescaler assigned to TMR0
+OPTION_REGbits.PS2 = 1; // 1:128 prescaler assigned to TMR0
 OPTION_REGbits.PS1 = 1;
 OPTION_REGbits.PS0 = 0;
-//OPTION_REGbits.PS2 = 1; // 1:256 prescaler assigned to TMR0
-//OPTION_REGbits.PS1 = 1;
-//OPTION_REGbits.PS0 = 1;
+
 
 INTCONbits.GIE = 1;     // global interrupts enabled
 INTCONbits.PEIE = 1;

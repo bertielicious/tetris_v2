@@ -4,15 +4,20 @@
 #include "config.h"
 #include "copy_tetris.h"
 #include "bits_to_byte.h"
+#include "clear_dropping.h"
+#include "clear_new_tet.h"
+
 void rotate_tet (void)
 {
     uchar row, col, new_row, new_col = 0;
+ 
     for (row = 0; row < 16; row++)
     {
         for (col = 0; col < 8; col++)
         {
             if ( dropping[row][col] == 1)          // ignore computing rotation of pixels containing zero
             {
+                
                 vector [0][0] = row;        // store row and col of tetris pixel  to be rotated in vector array
                 vector [1][0] = col;
                 vector_rel[0][0] = vector[0][0] - pivot[0][0];
@@ -34,6 +39,7 @@ void rotate_tet (void)
             }   
         }  
     }
+    
     for (row = 0; row < 16; row++)
     {
         for (col = 0; col < 8; col++)
@@ -41,7 +47,8 @@ void rotate_tet (void)
             dropping[row][col] = new_tet[row][col];  
    
         }
-}
-    bits_to_byte(&dropping[0][0], &dropping[8][0]);
+    }
+    clear_new_tet();                        // delete old rotation ready for new rotation
+    
 }
     

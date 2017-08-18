@@ -5,23 +5,27 @@
 #include "bits_to_byte.h"
 void mov_right(void)
 {
+    uchar temp_row[16];
+    uchar row, col;
     if(RIGHT == 0  && LEFT == 1)
     {
-        __delay_ms(10);
-    unsigned char temp_row_zero, temp_row_one, temp_row_two, row, col = 0;
-    temp_row_zero = dropping[0][7]; // save data at [0][7]
-    temp_row_one = dropping[1][7];  // save data at [1][7]
-    temp_row_two = dropping[2][7];  // save data at [2][7]
-    for (row = 0; row < 4; row++)
+        __delay_ms(75);
+        pivot[1][0] = pivot[1][0] + 1;
+    for( row = 0; row < 16; row++)
+            {
+                temp_row[row] = dropping[row][7];
+            }
+    
+    for (row = 0; row < 16; row++)
     {
         for (col = 7; col > 0; col--)
         {
             dropping[row][col] = dropping[row][col - 1];
         }
     }
-    dropping[0][0] = temp_row_zero;
-    dropping[1][0] = temp_row_one;
-    dropping [2][0] = temp_row_two;
-    bits_to_byte(&dropping[0][0], &dropping[8][0]);
+    for( row = 0; row < 16; row++)
+            {
+                dropping[row][0] = temp_row[row];   
+            }
     }
 }

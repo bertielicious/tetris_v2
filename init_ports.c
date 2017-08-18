@@ -10,6 +10,7 @@
  *  5       RC5     RED DE-BUG LED output
  *  10      RB7     GREEN DE-BUG LED output
  *  7       RC3     ROTATE TETRIS
+ *  6       RC4     DROP TETRIS
  */
 void init_ports(void)
 {
@@ -35,7 +36,8 @@ TRISCbits.TRISC6 = 0;   // CS (active low))
 TRISBbits.TRISB5 = 1;   // R switch
 TRISCbits.TRISC2 = 1;   // L switch
 TRISCbits.TRISC3 = 1;   // ROTATE TETRIS switch
-TRISAbits.TRISA5 = 0;   // buzzer
+TRISCbits.TRISC4 = 1;   // DROP TETRIS SWITCH
+TRISAbits.TRISA5 = 0;   // piezo buzzer
 TRISCbits.TRISC5 = 0;   // RED DE-BUG LED
 TRISBbits.TRISB7 = 0;   // GREEN DE-BUG LED
 
@@ -46,6 +48,6 @@ PORTCbits.RC6 = 0;
 PORTBbits.RB5 = 0;
 PORTCbits.RC2 = 0;
 PORTCbits.RC3 = 0;
-PORTAbits.RA5 = 0;
+PORTAbits.RA5 = 1;
 PORTBbits.RB7 = 0;
 }

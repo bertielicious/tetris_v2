@@ -21,4 +21,4 @@ extern "C" {
 
 #endif	/* DISPLAY_ON_8X8_H */
 
-void display_on_8x8(char sum_row1,char *sr2);
+void display_on_8x8(char *sum_row1,char *sr2);

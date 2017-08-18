@@ -6,7 +6,7 @@
 bool check_can_land(void)
 {
     uchar row, col;
-    for ( row = 0; row < 2; row++)
+    for ( row = 0; row < 2; row++)      // just check the inital landing position of the tetrino at top of dropping
     {
         for (col = 0; col < 8; col++)
         {

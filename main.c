@@ -21,13 +21,26 @@
 #include "drop_one_pixel.h"
 #include "clear_dropping.h"
 #include "clear_stuck.h"
+#include "check_right_collision.h"
+#include "check_left_collision.h"
+#include "check_completed_rows.h"
+#include "clear_completed_row.h"
+#include "drop_rows_above.h"
+#include "copy_dropping_to_stuck.h"
+#include "check_bottom_boundary.h"
+#include "check_vert_collision.h"
+#include "update_game_level.h"
+#include "display_on_8x8.h"
+#include "convert_score.h"
+#include "split_digits.h"
 
 #include "main.h"
 
 void main (void)
 {
-    uchar row, col, game_level = 0;
-    bool moveR, moveL = 1;
+    uchar i, row, col, full_row = 0;
+    bool moveR, moveL, rotL, rotR = 1;
+    bool bottom, coll = 0;
     init_ports();
     init_spi();
     init1_max7219();
@@ -36,41 +49,79 @@ void main (void)
     splash_screen();
     __delay_ms(2000);
     clear_game_play_area();
-    clear_dropping();
-    clear_stuck();
+    clear_dropping();       // clears the array dropping, which contains the dropping tetrino
+    clear_stuck();          // clears the array dropping, which contains the stuck/ landed tetrinos
     tet_piece = random();   // get a random num between 1 and 7
     new_tetris_shape(tet_piece); // copy tetrino into dropping[][]
-    can_land = check_can_land();    // test to see there is space for new tetrino to land
-    if(can_land == 0)
-    {
-        bits_to_byte(&dropping[0][0], &dropping[8][0]);
-        __delay_ms(100);
-    init_TMR0();
-    configTimer1();
-    }
+    init_TMR0(); // start TMR0 interrupts which multiplexes the 8x8 displays from displaying dropping and then stuck
+    configTimer1();  // 0.5 second gravity interrupt for dropping tetrino
+   
     
 
 while(1)
     {
-     moveL = check_left_boundary();  // 
-     if( moveL == 0 && LEFT == 0)
-        {
-           mov_left();
-        }
+     moveL = check_left_boundary();  // makes sure we can't move tetrino further left than  the left wall
+     if( moveL == 0 && LEFT == 0)    // check that a 0 was returned from check_left_boundary function and that LEFT button is pressed
+     { 
+         movl = check_left_collision(); // stops further left movement if another tetrino is in the way
+         if(movl == 0)  // no collisions or boundary wall found
+         {
+           mov_left();   // move one pixel left
+         }
+     }
+        
      
-     moveR = check_right_boundary();
-     if(moveR == 0 && RIGHT == 0)
+     moveR = check_right_boundary();// makes sure we can't move tetrino further right than the right wall
+     if(moveR == 0 && RIGHT == 0)  // check that a 0 was returned from check_right_boundary function and that RIGHT button is pressed
         {
-            mov_right();
-        } 
-     if (ROTATE == 0)
+            movr = check_right_collision();// stops further right movement if another tetrino is in the way
+            if (movr == 0) // no collisions or boundary wall found
             {
-            __delay_ms(50); 
-          
-            rotate_tet();
+                mov_right();  // move one pixel right
             }
-    }      
- }
+        } 
+     
+     if (DROP == 0)     // if DROP button is pressed
+     {
+         __delay_ms(75);    // debounce delay
+        
+        while( bottom != 1 && coll != 1) // repeat code block while tetrino is not yet at bottom wall and there is no tetrino to collide with vertically
+        {
+             drop_one_pixel();  // drop tetrino down by one pixel
+             coll = check_vert_collision();// returns 1 if there will be a collision with another tetrino
+             bottom = check_bottom_boundary();// returns a 1 if tetrino is at the bottom wall
+        }
+         bottom = 0;    // clear ready for next DROP
+         coll = 0;      // clear ready for next DROP
+         pivot[0][0] = 1;// restore initial values of pivot point when tetrino is first landed
+         pivot[1][0] = 4;
+         copy_dropping_to_stuck(); // tetrino is at bottom wall so needs to be copied to stuck
+         clear_dropping();          // dropping needs to be cleared to allow a new tetrino to be added to dropping
+         tet_piece = random();   // get a random num between 1 and 7 to spawn a new tetrino
+         new_tetris_shape(tet_piece); // copy tetrino into dropping[][]
+     }
+     
+     if (ROTATE == 0)   // if ROTATE button is pressed
+     {
+                __delay_ms(75);// de-bounce delay
+                rotate_tet(); // call rotate_tet function
+     }      
+        full_row = check_completed_rows();// identify which row of the game is fully completed with 1's, ie 11111111
+        clear_completed_row(full_row);  // call a function to clear the identified row to 00000000
+        if(full_row != 17)// if any from from 0 to 15 is completed
+        {
+            drop_rows_above(full_row); // drop the rows above the completed row down by one row, and copy all zeros into row [0][col]
+            full_row = 17;  // restore default value of full_row for next ROTATE operation
+            score = score + 1;  // increase the score by 1 for every completed row
+            update_game_level();// assigns appropriate game level according to current score
+            BUZZER = 0;     // create a beep from the buzzer when a completed row drops
+            __delay_ms(10);
+            BUZZER = 1;
+        }
+        
+    }    
+}
+ 
      
 
  
